@@ -1,0 +1,156 @@
+definitions:
+  model.Album:
+    properties:
+      artist:
+        type: string
+      id:
+        type: string
+      price:
+        type: number
+      title:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /albums:
+    get:
+      description: get all albums
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Album'
+            type: array
+      summary: List albums
+      tags:
+      - album
+    post:
+      consumes:
+      - application/json
+      description: create a new album
+      parameters:
+      - description: Album payload
+        in: body
+        name: album
+        required: true
+        schema:
+          $ref: '#/definitions/model.Album'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Album'
+      summary: Create album
+      tags:
+      - album
+  /albums/{id}:
+    delete:
+      parameters:
+      - description: Album ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete album by ID
+      tags:
+      - album
+    patch:
+      consumes:
+      - application/json
+      description: update one or more fields of an album
+      parameters:
+      - description: Album ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: album
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Album'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Patch album fields
+      tags:
+      - album
+    put:
+      consumes:
+      - application/json
+      description: update an existing album
+      parameters:
+      - description: Album ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated album
+        in: body
+        name: album
+        required: true
+        schema:
+          $ref: '#/definitions/model.Album'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Album'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update album by ID
+      tags:
+      - album
+  /example/helloworld:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: ping example
+      tags:
+      - example
+swagger: "2.0"
