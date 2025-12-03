@@ -1,10 +1,13 @@
 package service
 
 import (
+	"errors"
 	"example/go-web-gin/model"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // @BasePath /api/v1
@@ -18,35 +21,6 @@ import (
 // @Router /albums [get]
 func GetAllAlbums(c *gin.Context) {
 	c.IndentedJSON(200, model.Albums)
-}
-
-// bindAndValidate binds JSON into album and performs manual checks.
-// If requireID is true, the ID field must be present and non-empty.
-func bindAndValidate(c *gin.Context, album *model.Album, requireID bool) bool {
-	if err := c.ShouldBindJSON(album); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return false
-	}
-
-	errs := make(map[string]string)
-	if requireID && album.ID == "" {
-		errs["id"] = "required"
-	}
-	if album.Title == "" {
-		errs["title"] = "required"
-	}
-	if album.Artist == "" {
-		errs["artist"] = "required"
-	}
-	if album.Price <= 0 {
-		errs["price"] = "must be > 0"
-	}
-
-	if len(errs) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"errors": errs})
-		return false
-	}
-	return true
 }
 
 // GetAllAlbums godoc
@@ -82,8 +56,21 @@ func GetAllAlbumByID(c *gin.Context) {
 func PostAlbum(c *gin.Context) {
 	var newAlbum model.Album
 
-	// Bind and validate JSON to newAlbum (require ID)
-	if !bindAndValidate(c, &newAlbum, true) {
+	// Call BindJSON to bind the received JSON to
+	// newAlbum.
+	if err := c.ShouldBindJSON(&newAlbum); err != nil {
+		// Extract validation errors
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := make([]string, len(ve))
+			for i, fe := range ve {
+				out[i] = fmt.Sprintf("field %s failed on %s rule", fe.Field(), fe.Tag())
+			}
+			c.JSON(400, gin.H{"errors": out})
+			return
+		}
+
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -106,8 +93,7 @@ func PostAlbum(c *gin.Context) {
 func UpdateAlbum(c *gin.Context) {
 	var updatedAlbum model.Album
 
-	// Bind and validate JSON to updatedAlbum (ID not required in body)
-	if !bindAndValidate(c, &updatedAlbum, false) {
+	if err := c.BindJSON(&updatedAlbum); err != nil {
 		return
 	}
 
@@ -159,8 +145,7 @@ func PatchAlbum(c *gin.Context) {
 	id := c.Param("id")
 
 	var albumUpdates map[string]interface{}
-	if err := c.ShouldBindJSON(&albumUpdates); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.BindJSON(&albumUpdates); err != nil {
 		return
 	}
 
