@@ -1,6 +1,9 @@
 package router
 
 import (
+	"example/go-web-gin/database"
+	"example/go-web-gin/handler"
+	"example/go-web-gin/repositories"
 	"example/go-web-gin/service"
 
 	"example/go-web-gin/docs"
@@ -17,16 +20,22 @@ func RegisterRoutes(r *gin.Engine) {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.Schemes = []string{"http"}
+
+	database.ConnectDB()
+	repo := repositories.NewAlbumRepoImpl(database.DB)
+	albumService := service.NewAlbumService(repo)
+	albumHandler := handler.NewAlbumHandler(albumService)
+
 	v1 := r.Group("/api/v1")
 	{
 		albums := v1.Group("/albums")
 		{
-			albums.GET("/", service.GetAllAlbums)
-			albums.POST("/", service.PostAlbum)
-			albums.GET("/:id", service.GetAllAlbumByID)
-			albums.PUT("/:id", service.UpdateAlbum)
-			albums.DELETE("/:id", service.DeleteAlbum)
-			albums.PATCH("/:id", service.PatchAlbum)
+			albums.GET("/", albumHandler.GetAllAlbums)
+			albums.POST("/", albumHandler.PostAlbum)
+			albums.GET("/:id", albumHandler.GetAlbumByID)
+			albums.PUT("/:id", albumHandler.UpdateAlbum)
+			albums.DELETE("/:id", albumHandler.DeleteAlbum)
+			albums.PATCH("/:id", albumHandler.PatchAlbum)
 		}
 	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

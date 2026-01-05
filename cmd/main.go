@@ -1,6 +1,7 @@
 package main
 
 import (
+	"example/go-web-gin/config"
 	"example/go-web-gin/middleware"
 	"example/go-web-gin/router"
 
@@ -8,6 +9,8 @@ import (
 )
 
 func main() {
+	config.LoadConfig()
+
 	route := gin.Default()
 	// Use reusable request logging middleware
 	route.Use(middleware.RequestLogger())
