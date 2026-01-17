@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    container_name: album_container_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres # The database username
+      POSTGRES_PASSWORD: postgres # The database password
+      POSTGRES_DB: albumdb # The name of the default database
+    ports:
+      - "5432:5432" # Host Port : Container Port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data even if container stops
+
+volumes:
+  postgres_data:
