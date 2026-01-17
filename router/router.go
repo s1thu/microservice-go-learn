@@ -3,6 +3,7 @@ package router
 import (
 	"example/go-web-gin/database"
 	"example/go-web-gin/handler"
+	"example/go-web-gin/middleware"
 	"example/go-web-gin/repositories"
 	"example/go-web-gin/service"
 
@@ -26,8 +27,21 @@ func RegisterRoutes(r *gin.Engine) {
 	albumService := service.NewAlbumService(repo)
 	albumHandler := handler.NewAlbumHandler(albumService)
 
+	authService := service.NewAuthService([]byte("a-string-secret-at-least-256-bits-long"))
+	authHandler := handler.NewAuthHandler(authService)
 	v1 := r.Group("/api/v1")
 	{
+		// 🔓 Public routes
+		v1.POST("/auth/login", authHandler.Login)
+
+		// 🔒 Protected routes
+		protected := v1.Group("/hello")
+		protected.Use(middleware.JWTAuth(authService))
+		{
+			protected.GET("/protected", func(c *gin.Context) {
+				c.JSON(200, gin.H{"message": "You have accessed a protected route"})
+			})
+		}
 		albums := v1.Group("/albums")
 		{
 			albums.GET("/", albumHandler.GetAllAlbums)
