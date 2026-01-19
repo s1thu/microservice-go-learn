@@ -1,6 +1,7 @@
 package router
 
 import (
+	"example/go-web-gin/config"
 	"example/go-web-gin/database"
 	"example/go-web-gin/handler"
 	"example/go-web-gin/middleware"
@@ -27,7 +28,7 @@ func RegisterRoutes(r *gin.Engine) {
 	albumService := service.NewAlbumService(repo)
 	albumHandler := handler.NewAlbumHandler(albumService)
 
-	authService := service.NewAuthService([]byte("a-string-secret-at-least-256-bits-long"))
+	authService := service.NewAuthService([]byte(config.AppConfig.JWTSecret))
 	authHandler := handler.NewAuthHandler(authService)
 	v1 := r.Group("/api/v1")
 	{

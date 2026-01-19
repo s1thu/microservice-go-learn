@@ -17,5 +17,5 @@ func main() {
 	// Register routes from router package
 	router.RegisterRoutes(route)
 
-	route.Run("localhost:8080")
+	route.Run(":8080")
 }
