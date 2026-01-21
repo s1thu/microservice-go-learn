@@ -24,6 +24,7 @@ func RegisterRoutes(r *gin.Engine) {
 	docs.SwaggerInfo.Schemes = []string{"http"}
 
 	database.ConnectDB()
+	config.ExampleClient()
 	repo := repositories.NewAlbumRepoImpl(database.DB)
 	albumService := service.NewAlbumService(repo)
 	albumHandler := handler.NewAlbumHandler(albumService)
